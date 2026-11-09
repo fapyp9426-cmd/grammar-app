@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Grammar App: Ultimate</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800;900&display=swap');
+
+        :root {
+            --bg: #0f172a;
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            --card-bg: rgba(255, 255, 255, 0.06);
+            --card-border: rgba(255, 255, 255, 0.12);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --primary: #818cf8;
+            --success: #34d399;
+            --error: #f87171;
+            --nav-bg: rgba(15, 23, 42, 0.9);
+            --shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Nunito', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* --- ФОН --- */
+        .bg-shapes {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            overflow: hidden; z-index: 0; pointer-events: none;
+        }
+        .shape {
+            position: absolute; border-radius: 50%;
+            filter: blur(60px); opacity: 0.5;
+            animation: float 10s infinite alternate ease-in-out;
+        }
+        .shape-1 { width: 200px; height: 200px; background: #4f46e5; top: -50px; left: -50px; }
+        .shape-2 { width: 250px; height: 250px; background: #db2777; bottom: -50px; right: -50px; animation-delay: -3s; }
+        .shape-3 { width: 150px; height: 150px; background: #0ea5e9; top: 40%; left: 60%; animation-delay: -6s; }
+        @keyframes float { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(30px, 50px) scale(1.1); } }
+
+        /* --- НАВИГАЦИЯ --- */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: var(--nav-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid var(--card-border);
+            display: flex; justify-content: space-around;
+            padding: 12px 5px; padding-bottom: max(12px, env(safe-area-inset-bottom));
+            z-index: 100;
+        }
+        .nav-item {
+            display: flex; flex-direction: column; align-items: center;
+            color: var(--text-muted); font-size: 12px; font-weight: 800;
+            cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 8px 24px; border-radius: 16px;
+        }
+        .nav-item.active { color: var(--primary); background: rgba(129, 140, 248, 0.15); transform: translateY(-4px); }
+        .nav-icon { font-size: 26px; margin-bottom: 4px; transition: transform 0.3s; }
+        .nav-item.active .nav-icon { transform: scale(1.2); }
+
+        /* --- КОНТЕЙНЕР --- */
+        .main-container {
+            flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+            padding-bottom: 120px; position: relative; z-index: 1;
+        }
+        .screen {
+            display: none; padding: 24px 20px; min-height: 100%;
+            animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            flex-direction: column;
+        }
+        .screen.active { display: flex; }
+        @keyframes slideInRight { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes popIn { 0% { opacity: 0; transform: scale(0.8); } 100% { opacity: 1; transform: scale(1); } }
+
+        /* --- СПРАВОЧНИК --- */
+        .ref-title {
+            font-size: 28px; font-weight: 900; margin-bottom: 24px; text-align: center;
+            background: linear-gradient(to right, #c084fc, #818cf8);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .ref-card {
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: 24px; padding: 24px; margin-bottom: 20px;
+            backdrop-filter: blur(10px); animation: popIn 0.5s ease backwards;
+        }
+        .ref-card:nth-child(2) { animation-delay: 0.1s; }
+        .ref-card:nth-child(3) { animation-delay: 0.2s; }
+        .ref-card h3 { font-size: 20px; font-weight: 800; margin-bottom: 16px; color: #a5b4fc; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 12px; }
+        .ref-card ul { list-style: none; }
+        .ref-card li { font-size: 16px; line-height: 1.5; margin-bottom: 12px; padding-left: 24px; position: relative; }
+        .ref-card li::before { content: "✦"; color: var(--primary); position: absolute; left: 0; font-size: 18px; }
+        .example { display: block; font-size: 14px; color: var(--text-muted); font-style: italic; margin-top: 4px; }
+
+        /* --- МЕНЮ И КАРТОЧКИ --- */
+        .menu-title { font-size: 26px; font-weight: 900; text-align: center; margin-bottom: 30px; }
+        .cards-grid { display: flex; flex-direction: column; gap: 16px; }
+        .theme-card {
+            background: var(--card-bg); border: 2px solid var(--card-border);
+            border-radius: 20px; padding: 20px; display: flex; align-items: center;
+            cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--shadow); animation: popIn 0.4s backwards;
+        }
+        .theme-card:active { transform: scale(0.96) translateY(2px); background: rgba(255,255,255,0.12); border-color: var(--primary); }
+        .theme-icon { font-size: 36px; margin-right: 20px; background: rgba(255,255,255,0.08); width: 64px; height: 64px; display: flex; align-items: center; justify-content: center; border-radius: 18px; }
+        .theme-info h3 { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
+        .theme-info p { font-size: 14px; color: var(--text-muted); font-weight: 600; }
+
+        /* --- ТЕСТ --- */
+        .quiz-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .btn-back { background: var(--card-bg); border: 1px solid var(--card-border); color: white; padding: 10px 20px; border-radius: 12px; font-size: 14px; font-weight: 800; cursor: pointer; transition: 0.2s; }
+        .btn-back:active { transform: scale(0.95); background: rgba(255,255,255,0.15); }
+        .q-counter { font-size: 15px; font-weight: 900; color: var(--primary); }
+        .progress-bg { width: 100%; height: 10px; background: rgba(255,255,255,0.1); border-radius: 10px; margin-bottom: 30px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #818cf8, #c084fc); width: 0%; border-radius: 10px; transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+
+        .question-box { background: var(--card-bg); border: 1px solid var(--card-border); padding: 30px 20px; border-radius: 24px; margin-bottom: 24px; text-align: center; box-shadow: var(--shadow); animation: popIn 0.3s; }
+        .question-text { font-size: 20px; font-weight: 800; line-height: 1.4; }
+        .options-grid { display: flex; flex-direction: column; gap: 14px; }
+        .option-btn { background: var(--card-bg); border: 2px solid var(--card-border); padding: 18px 20px; border-radius: 18px; font-size: 16px; font-weight: 700; color: var(--text-main); text-align: left; cursor: pointer; transition: all 0.2s ease; }
+        .option-btn:active { transform: scale(0.98); background: rgba(255,255,255,0.12); }
+        .option-btn.correct { background: rgba(52, 211, 153, 0.2); border-color: var(--success); color: var(--success); transform: scale(1.02); box-shadow: 0 0 15px rgba(52, 211, 153, 0.3); }
+        .option-btn.wrong { background: rgba(248, 113, 113, 0.2); border-color: var(--error); color: var(--error); animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
+        @keyframes shake { 10%, 90% { transform: translate3d(-2px, 0, 0); } 20%, 80% { transform: translate3d(4px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-6px, 0, 0); } 40%, 60% { transform: translate3d(6px, 0, 0); } }
+
+        /* --- ЭКРАН РЕЗУЛЬТАТА (С АНИМАЦИЯМИ ВНУТРИ) --- */
+        #screen-result {
+            position: relative;
+            overflow: hidden; /* Чтобы самолет не вылетал за пределы экрана */
+        }
+
+        .result-container { 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            text-align: center; min-height: 80vh; padding-bottom: 50px; 
+            position: relative; width: 100%;
+            animation: popIn 0.6s cubic-bezier(0.16, 1, 0.3, 1); 
+        }
+
+        .score-circle { 
+            width: 180px; height: 180px; border-radius: 50%; display: flex; justify-content: center; align-items: center; 
+            margin-bottom: 30px; position: relative; 
+            background: conic-gradient(var(--primary) 0%, rgba(255,255,255,0.05) 0%); 
+            transition: background 0.5s ease-out, box-shadow 0.5s ease-out; 
+            box-shadow: 0 0 30px rgba(129, 140, 248, 0.2); 
+            z-index: 10;
+        }
+        .score-circle::before { content: ""; position: absolute; width: 150px; height: 150px; background: #151b2e; border-radius: 50%; }
+        .score-value { position: relative; font-size: 54px; font-weight: 900; color: white; transition: color 0.3s; }
+        .result-title { font-size: 28px; font-weight: 900; margin-bottom: 10px; z-index: 10; transition: color 0.3s; }
+        .result-desc { font-size: 16px; color: var(--text-muted); margin-bottom: 40px; padding: 0 20px; line-height: 1.5; z-index: 10; }
+
+        /* Плавное появление кнопок */
+        .result-actions {
+            display: flex; flex-direction: column; width: 100%; max-width: 320px;
+            opacity: 0; transform: translateY(30px);
+            transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 10;
+        }
+        .result-actions.visible { opacity: 1; transform: translateY(0); }
+
+        .btn-primary { background: var(--primary); color: #0f172a; border: none; padding: 18px 32px; border-radius: 16px; font-size: 18px; font-weight: 900; cursor: pointer; box-shadow: 0 8px 25px rgba(129, 140, 248, 0.4); width: 100%; transition: 0.2s; }
+        .btn-primary:active { transform: scale(0.95) translateY(4px); box-shadow: 0 4px 10px rgba(129, 140, 248, 0.3); }
+        .btn-secondary { background: transparent; color: var(--text-main); border: 2px solid var(--card-border); margin-top: 14px; box-shadow: none; }
+
+        /* --- АНИМАЦИИ КАТСЦЕНЫ (ВНУТРИ РЕЗУЛЬТАТА) --- */
+        /* Самолет */
+        .plane {
+            position: absolute; right: -200px; top: 25%; /* Примерно на уровне круга */
+            font-size: 100px; z-index: 20;
+            transform: translateY(-50%) rotate(45deg);
+            display: none; /* Скрыт по умолчанию */
+        }
+        .plane.fly { display: block; animation: flyIn 1s cubic-bezier(0.4, 0, 1, 1) forwards; }
+
+        @keyframes flyIn {
+            0% { right: -200px; transform: translateY(-50%) rotate(45deg) scale(1); }
+            100% { right: 50%; transform: translateY(-50%) rotate(135deg) scale(0.5); }
+        }
+
+        /* Взрыв */
+        .explosion {
+            position: absolute; top: 25%; left: 50%;
+            width: 10px; height: 10px; border-radius: 50%;
+            background: #fff; transform: translate(-50%, -50%) scale(0);
+            z-index: 30; opacity: 0; pointer-events: none;
+        }
+        .explosion.boom { animation: explode 0.6s ease-out forwards; }
+
+        @keyframes explode {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 1; background: #fff; box-shadow: 0 0 100px 50px #f87171, 0 0 200px 100px #fb923c; }
+            50% { opacity: 1; background: #fb923c; }
+            100% { transform: translate(-50%, -50%) scale(40); opacity: 0; }
+        }
+
+        /* Тряска экрана (применяется к контейнеру результатов) */
+        .shake-screen { animation: violentShake 0.5s; }
+        @keyframes violentShake {
+            0%, 100% { transform: translate(0, 0) rotate(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translate(-15px, -15px) rotate(-2deg); }
+            20%, 40%, 60%, 80% { transform: translate(15px, 15px) rotate(2deg); }
+        }
+
+        /* Трещина (SVG) */
+        .crack-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 15; opacity: 0;
+            transition: opacity 0.3s;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"><path d="M300,0 L400,200 L250,400 L500,600 L300,800 L450,1200" stroke="rgba(255,255,255,0.6)" stroke-width="8" fill="none"/><path d="M400,200 L600,300 L700,600" stroke="rgba(255,255,255,0.4)" stroke-width="5" fill="none"/><path d="M250,400 L100,450 L50,700" stroke="rgba(255,255,255,0.5)" stroke-width="6" fill="none"/><path d="M500,600 L800,700 L900,1000" stroke="rgba(255,255,255,0.4)" stroke-width="4" fill="none"/></svg>');
+            background-size: cover; background-position: center;
+        }
+        .crack-overlay.show { opacity: 1; }
+
+    </style>
+</head>
+<body>
+
+    <!-- Анимированный фон -->
+    <div class="bg-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+
+    <div class="main-container" id="main-container">
+        
+        <!-- ЭКРАН 1: СПРАВОЧНИК -->
+        <div id="screen-material" class="screen active">
+            <h1 class="ref-title">Шпаргалка 📖</h1>
+            
+            <div class="ref-card">
+                <h3>Подлежащее (Кто? Что?)</h3>
+                <ul>
+                    <li>Сущ. в им. падеже <span class="example">Ночь настала.</span></li>
+                    <li>Инфинитив <span class="example">Учиться — наша задача.</span></li>
+                    <li>Словосочетание <span class="example">Мы с братом пошли.</span></li>
+                    <li>Местоимение <span class="example">Я, ты, мы, кто-то...</span></li>
+                    <li>Прилаг./Причастие в роли сущ. <span class="example">Окружающие хвалили меня.</span></li>
+                </ul>
+            </div>
+
+            <div class="ref-card">
+                <h3>Сказуемое (Что делает?)</h3>
+                <ul>
+                    <li>Глагол в любом наклонении <span class="example">Он пел, поёт и споёт.</span></li>
+                    <li>Сложное будущее <span class="example">Деревья будут расти.</span></li>
+                    <li>Повелит. наклонение + частицы <span class="example">Да пойдемте сюда!</span></li>
+                    <li>Глагол + частицы (было, так и) <span class="example">Снег так и валил.</span></li>
+                    <li>Фразеологизм <span class="example">Он стоял как вкопанный!</span></li>
+                </ul>
+            </div>
+            
+            <div class="ref-card" style="margin-bottom: 40px;">
+                <h3>Важное примечание</h3>
+                <ul>
+                    <li>В русском языке подлежащее и сказуемое составляют <b>грамматическую основу</b>.</li>
+                    <li>Они не всегда совпадают с логическим субъектом и объектом действия.</li>
+                    <li>Потренируйся на тестах, чтобы закрепить материал! 🚀</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- ЭКРАН 2: МЕНЮ ТЕСТОВ -->
+        <div id="screen-test-menu" class="screen">
+            <h1 class="menu-title">Выбери тему 🚀</h1>
+            <div class="cards-grid">
+                <div class="theme-card" onclick="openTheme('subject')">
+                    <div class="theme-icon">🕵️‍♂️</div>
+                    <div class="theme-info">
+                        <h3>Подлежащее</h3>
+                        <p>3 теста на поиск главного слова</p>
+                    </div>
+                </div>
+                <div class="theme-card" onclick="openTheme('predicate')">
+                    <div class="theme-icon">🏃‍♂️</div>
+                    <div class="theme-info">
+                        <h3>Сказуемое</h3>
+                        <p>3 теста на глаголы и фразеологизмы</p>
+                    </div>
+                </div>
+                <div class="theme-card" onclick="openTheme('mix')">
+                    <div class="theme-icon">🏆</div>
+                    <div class="theme-info">
+                        <h3>Супер-микс</h3>
+                        <p>3 теста на всё сразу</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ЭКРАН 3: СПИСОК ТЕСТОВ -->
+        <div id="screen-test-list" class="screen">
+            <div class="quiz-header">
+                <button class="btn-back" onclick="switchScreen('screen-test-menu')">← Назад</button>
+            </div>
+            <h1 class="menu-title" id="theme-title">Тесты</h1>
+            <div class="cards-grid" id="test-list-container"></div>
+        </div>
+
+        <!-- ЭКРАН 4: ПРОХОЖДЕНИЕ ТЕСТА -->
+        <div id="screen-quiz" class="screen">
+            <div class="quiz-header">
+                <button class="btn-back" onclick="switchScreen('screen-test-list')">← Выход</button>
+                <div class="q-counter" id="q-counter">1 / 5</div>
+            </div>
+            <div class="progress-bg"><div class="progress-fill" id="progress-fill"></div></div>
+            <div id="quiz-content"></div>
+        </div>
+
+        <!-- ЭКРАН 5: РЕЗУЛЬТАТ (ТУТ ЖЕ И АНИМАЦИЯ) -->
+        <div id="screen-result" class="screen">
+            <div class="result-container" id="result-content">
+                <!-- Сюда рендерится всё через JS -->
+            </div>
+        </div>
+
+    </div>
+
+    <!-- НИЖНЯЯ НАВИГАЦИЯ -->
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="switchTab('screen-material', this)">
+            <span class="nav-icon">📖</span>
+            <span>Материал</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('screen-test-menu', this)">
+            <span class="nav-icon">📝</span>
+            <span>Тесты</span>
+        </div>
+    </div>
+
+    <script>
+        // --- МЕГА-БАЗА ДАННЫХ ---
+        const appData = {
+            subject: {
+                title: "Подлежащее",
+                tests: {
+                    easy: { title: "Тест 1. Легкий", questions: [
+                        { q: "Найдите подлежащее: 'Ночь настала.'", options: ["Ночь", "Настала", "Нет", "Ночь настала"], correct: 0 },
+                        { q: "Найдите подлежащее: 'Он пел и плясал.'", options: ["Он", "Пел", "Плясал", "Нет"], correct: 0 },
+                        { q: "Найдите подлежащее: 'Мы с братом пошли в кино.'", options: ["Мы", "С братом", "Мы с братом", "Кино"], correct: 2 },
+                        { q: "Найдите подлежащее: 'Кто-то постучал в дверь.'", options: ["Кто-то", "Постучал", "Дверь", "Нет"], correct: 0 },
+                        { q: "Найдите подлежащее: 'Дом построен рабочими.'", options: ["Дом", "Построен", "Рабочими", "Нет"], correct: 0 }
+                    ]},
+                    medium: { title: "Тест 2. Средний", questions: [
+                        { q: "Найдите подлежащее: 'Учиться — наша задача.'", options: ["Учиться", "Задача", "Наша", "Нет"], correct: 0 },
+                        { q: "Найдите подлежащее: 'Окружающие хвалили меня.'", options: ["Окружающие", "Хвалили", "Меня", "Нет"], correct: 0 },
+                        { q: "Найдите подлежащее: 'Меньше пяти не пришло.'", options: ["Меньше пяти", "Пяти", "Не пришло", "Нет"], correct: 0 },
+                        { q: "Найдите подлежащее: 'Дед с бабкой тянули репку.'", options: ["Дед", "С бабкой", "Дед с бабкой", "Репку"], correct: 2 },
+                        { q: "Найдите подлежащее: 'Взрослые пили чай.'", options: ["Взрослые", "Пили", "Чай", "Нет"], correct: 0 }
+                    ]},
+                    hard: { title: "Тест 3. Сложный", questions: [
+                        { q: "Найдите подлежащее: 'Жить — Родине служить.'", options: ["Жить", "Родине", "Служить", "Нет"], correct: 0 },
+                        { q: "Найдите подлежащее: 'Никто не хотел уходить.'", options: ["Никто", "Не хотел", "Уходить", "Нет"], correct: 0 },
+                        { q: "Найдите подлежащее: 'Три девицы пряли под окном.'", options: ["Три девицы", "Под окном", "Пряли", "Нет"], correct: 0 },
+                        { q: "Найдите подлежащее: 'Больной быстро поправился.'", options: ["Больной", "Быстро", "Поправился", "Нет"], correct: 0 },
+                        { q: "Найдите подлежащее: 'Что-то белое мелькнуло вдали.'", options: ["Что-то", "Белое", "Что-то белое", "Мелькнуло"], correct: 2 }
+                    ]}
+                }
+            },
+            predicate: {
+                title: "Сказуемое",
+                tests: {
+                    easy: { title: "Тест 1. Легкий", questions: [
+                        { q: "Найдите сказуемое: 'Он пел песню.'", options: ["Он", "Пел", "Песню", "Нет"], correct: 1 },
+                        { q: "Найдите сказуемое: 'Деревья будут расти.'", options: ["Деревья", "Будут", "Будут расти", "Расти"], correct: 2 },
+                        { q: "Найдите сказуемое: 'Пиши аккуратно!'", options: ["Пиши", "Аккуратно", "Нет", "Пиши аккуратно"], correct: 0 },
+                        { q: "Найдите сказуемое: 'Да пойдемте сюда!'", options: ["Да", "Пойдемте", "Да пойдемте", "Сюда"], correct: 2 },
+                        { q: "Найдите сказуемое: 'Снег валил весь день.'", options: ["Снег", "Валил", "Весь день", "Нет"], correct: 1 }
+                    ]},
+                    medium: { title: "Тест 2. Средний", questions: [
+                        { q: "Найдите сказуемое: 'Снег так и валил.'", options: ["Снег", "Так и валил", "Валил", "Нет"], correct: 1 },
+                        { q: "Найдите сказуемое: 'Отец пошёл было на берег.'", options: ["Отец", "Пошёл", "Пошёл было", "На берег"], correct: 2 },
+                        { q: "Найдите сказуемое: 'Он знай себе посмеивается.'", options: ["Он", "Знай себе посмеивается", "Посмеивается", "Знай"], correct: 1 },
+                        { q: "Найдите сказуемое: 'Мы будем петь песни.'", options: ["Мы", "Будем", "Будем петь", "Песни"], correct: 2 },
+                        { q: "Найдите сказуемое: 'Да пойдите сюда!'", options: ["Да", "Пойдите", "Да пойдите", "Сюда"], correct: 2 }
+                    ]},
+                    hard: { title: "Тест 3. Сложный", questions: [
+                        { q: "Найдите сказуемое: 'Он стоял как вкопанный!'", options: ["Он", "Стоял", "Стоял как вкопанный", "Вкопанный"], correct: 2 },
+                        { q: "Найдите сказуемое: 'Он весь день бил баклуши.'", options: ["Он", "Весь день", "Бил", "Бил баклуши"], correct: 3 },
+                        { q: "Найдите сказуемое: 'Он сидел как на иголках.'", options: ["Он", "Сидел", "Сидел как на иголках", "На иголках"], correct: 2 },
+                        { q: "Найдите сказуемое: 'Он пошел было в кино.'", options: ["Он", "Пошел", "Пошел было", "В кино"], correct: 2 },
+                        { q: "Найдите сказуемое: 'Он пел, поет и споет.'", options: ["Пел", "Поет", "Споет", "Пел, поет, споет"], correct: 3 }
+                    ]}
+                }
+            },
+            mix: {
+                title: "Супер-микс",
+                tests: {
+                    easy: { title: "Тест 1. Легкий", questions: [
+                        { q: "Найдите основу: 'Мальчик читает книгу.'", options: ["Мальчик", "Читает", "Мальчик читает", "Книгу"], correct: 2 },
+                        { q: "Найдите основу: 'Ночь настала.'", options: ["Ночь", "Настала", "Ночь настала", "Нет"], correct: 2 },
+                        { q: "Найдите основу: 'Учиться — наша задача.'", options: ["Учиться", "Задача", "Учиться задача", "Наша задача"], correct: 2 },
+                        { q: "Найдите основу: 'Деревья будут расти.'", options: ["Деревья", "Будут", "Будут расти", "Деревья будут расти"], correct: 3 },
+                        { q: "Найдите основу: 'Пиши аккуратно!'", options: ["Пиши", "Аккуратно", "Пиши аккуратно", "Нет"], correct: 2 }
+                    ]},
+                    medium: { title: "Тест 2. Средний", questions: [
+                        { q: "Найдите основу: 'Мы с братом пошли в кино.'", options: ["Мы", "Пошли", "Мы с братом пошли", "Мы пошли"], correct: 2 },
+                        { q: "Найдите основу: 'Снег так и валил.'", options: ["Снег", "Валил", "Снег так и валил", "Снег валил"], correct: 2 },
+                        { q: "Найдите основу: 'Окружающие хвалили меня.'", options: ["Окружающие", "Хвалили", "Окружающие хвалили", "Хвалили меня"], correct: 2 },
+                        { q: "Найдите основу: 'Отец пошёл было на берег.'", options: ["Отец", "Пошёл", "Отец пошёл было", "Отец пошёл"], correct: 2 },
+                        { q: "Найдите основу: 'Он стоял как вкопанный!'", options: ["Он", "Стоял", "Он стоял как вкопанный", "Он стоял"], correct: 2 }
+                    ]},
+                    hard: { title: "Тест 3. Сложный", questions: [
+                        { q: "Найдите основу: 'Меньше пяти не пришло.'", options: ["Меньше пяти", "Не пришло", "Меньше пяти не пришло", "Нет"], correct: 2 },
+                        { q: "Найдите основу: 'Он знай себе посмеивается.'", options: ["Он", "Посмеивается", "Он знай себе посмеивается", "Знай посмеивается"], correct: 2 },
+                        { q: "Найдите основу: 'Три девицы пряли под окном.'", options: ["Три девицы", "Пряли", "Три девицы пряли", "Пряли под окном"], correct: 2 },
+                        { q: "Найдите основу: 'Он весь день бил баклуши.'", options: ["Он", "Бил", "Он бил баклуши", "Бил баклуши"], correct: 2 },
+                        { q: "Найдите основу: 'Жить — Родине служить.'", options: ["Жить", "Служить", "Жить служить", "Родине служить"], correct: 2 }
+                    ]}
+                }
+            }
+        };
+
+        let state = { currentTheme: null, currentTest: null, qIndex: 0, score: 0 };
+
+        // --- НАВИГАЦИЯ ---
+        function switchTab(screenId, navEl) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            
+            const targetScreen = document.getElementById(screenId);
+            if (targetScreen) targetScreen.classList.add('active');
+            if(navEl) navEl.classList.add('active');
+            
+            if (screenId === 'screen-test-menu') state.currentTheme = null;
+            document.getElementById('main-container').scrollTop = 0;
+        }
+
+        function switchScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+            document.getElementById('main-container').scrollTop = 0;
+        }
+
+        // --- ЛОГИКА ТЕСТОВ ---
+        function openTheme(themeKey) {
+            state.currentTheme = themeKey;
+            const themeData = appData[themeKey];
+            document.getElementById('theme-title').textContent = themeData.title;
+            const container = document.getElementById('test-list-container');
+            container.innerHTML = '';
+            
+            let delay = 0;
+            for (const [key, testData] of Object.entries(themeData.tests)) {
+                const card = document.createElement('div');
+                card.className = 'theme-card';
+                card.style.animationDelay = `${delay}s`;
+                delay += 0.1;
+                card.onclick = () => startTest(key);
+                card.innerHTML = `
+                    <div class="theme-icon">${key === 'easy' ? '🟢' : key === 'medium' ? '🟡' : '🔴'}</div>
+                    <div class="theme-info"><h3>${testData.title}</h3><p>5 вопросов</p></div>
+                `;
+                container.appendChild(card);
+            }
+            switchScreen('screen-test-list');
+        }
+
+        function startTest(testKey) {
+            state.currentTest = testKey;
+            state.qIndex = 0;
+            state.score = 0;
+            switchScreen('screen-quiz');
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const testData = appData[state.currentTheme].tests[state.currentTest];
+            const qData = testData.questions[state.qIndex];
+            
+            const progress = (state.qIndex / testData.questions.length) * 100;
+            document.getElementById('progress-fill').style.width = `${progress}%`;
+            document.getElementById('q-counter').textContent = `${state.qIndex + 1} / ${testData.questions.length}`;
+            
+            document.getElementById('quiz-content').innerHTML = `
+                <div class="question-box"><div class="question-text">${qData.q}</div></div>
+                <div class="options-grid" id="options-container"></div>
+            `;
+            
+            const optionsContainer = document.getElementById('options-container');
+            qData.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = opt;
+                btn.onclick = () => checkAnswer(idx, btn);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selectedIdx, btnEl) {
+            const testData = appData[state.currentTheme].tests[state.currentTest];
+            const qData = testData.questions[state.qIndex];
+            const allBtns = document.querySelectorAll('.option-btn');
+            
+            allBtns.forEach(b => b.disabled = true);
+            
+            if (selectedIdx === qData.correct) {
+                btnEl.classList.add('correct');
+                state.score++;
+            } else {
+                btnEl.classList.add('wrong');
+                allBtns[qData.correct].classList.add('correct');
+            }
+            
+            setTimeout(() => {
+                state.qIndex++;
+                if (state.qIndex < testData.questions.length) {
+                    loadQuestion();
+                } else {
+                    finishTest();
+                }
+            }, 1000);
+        }
+
+        function finishTest() {
+            const testData = appData[state.currentTheme].tests[state.currentTest];
+            const total = testData.questions.length;
+            const percent = Math.round((state.score / total) * 100);
+
+            if (state.score === 0) {
+                playCutscene(0, total); // Запускаем анимацию прямо на экране результата
+            } else {
+                renderResult(percent, total);
+            }
+        }
+
+        function renderResult(percent, total) {
+            switchScreen('screen-result');
+            
+            let color = 'var(--error)';
+            let title = "Нужно повторить 😔";
+            let desc = "Загляни во вкладку 'Материал' и попробуй снова.";
+            
+            if (percent >= 90) {
+                color = 'var(--success)';
+                title = "Великолепно! 🎉";
+                desc = "Ты настоящий гений грамматики!";
+                createConfetti();
+            } else if (percent >= 70) {
+                color = '#60a5fa';
+                title = "Хорошо! 👍";
+                desc = "Отличный результат, но есть куда расти.";
+            } else if (percent >= 50) {
+                color = '#fbbf24';
+                title = "Неплохо 🤔";
+                desc = "Некоторые правила стоит подучить.";
+            }
+            
+            const container = document.getElementById('result-content');
+            container.innerHTML = `
+                <div class="score-circle" style="background: conic-gradient(${color} ${percent}%, rgba(255,255,255,0.05) ${percent}%)">
+                    <span class="score-value">${percent}%</span>
+                </div>
+                <div class="result-title">${title}</div>
+                <div class="result-desc">Правильно: ${state.score} из ${total}.<br><br>${desc}</div>
+                
+                <div class="result-actions" id="result-actions">
+                    <button class="btn-primary" onclick="startTest('${state.currentTest}')">Пройти заново 🔄</button>
+                    <button class="btn-primary btn-secondary" onclick="switchScreen('screen-test-list')">Другой тест</button>
+                </div>
+            `;
+            
+            setTimeout(() => {
+                const circle = container.querySelector('.score-circle');
+                circle.style.background = `conic-gradient(${color} ${percent}%, rgba(255,255,255,0.05) ${percent}%)`;
+                
+                setTimeout(() => {
+                    document.getElementById('result-actions').classList.add('visible');
+                }, 400);
+            }, 100);
+        }
+
+        // --- КАТСЦЕНА ПРЯМО В ЭКРАНЕ РЕЗУЛЬТАТА ---
+        function playCutscene(percent, total) {
+            switchScreen('screen-result');
+            
+            const container = document.getElementById('result-content');
+            
+            // 1. Рендерим начальное состояние (100% и без кнопок)
+            container.innerHTML = `
+                <div class="crack-overlay" id="crack-overlay"></div>
+                <div class="plane" id="plane">✈️</div>
+                <div class="explosion" id="explosion"></div>
+                
+                <div class="score-circle" id="score-circle" style="background: conic-gradient(var(--success) 100%, rgba(255,255,255,0.05) 100%); box-shadow: 0 0 30px rgba(52, 211, 153, 0.4);">
+                    <span class="score-value" id="score-value" style="color: var(--success); text-shadow: 0 0 20px rgba(52,211,153,0.5);">100%</span>
+                </div>
+                <div class="result-title" id="result-title" style="color: var(--success);">Идеально! 🎉</div>
+                <div class="result-desc" id="result-desc">Правильно: 5 из 5. Ждем результатов...</div>
+                
+                <div class="result-actions" id="result-actions">
+                    <button class="btn-primary" onclick="startTest('${state.currentTest}')">Пройти заново 🔄</button>
+                    <button class="btn-primary btn-secondary" onclick="switchScreen('screen-test-list')">Другой тест</button>
+                </div>
+            `;
+
+            const plane = document.getElementById('plane');
+            const explosion = document.getElementById('explosion');
+            const scoreCircle = document.getElementById('score-circle');
+            const scoreValue = document.getElementById('score-value');
+            const title = document.getElementById('result-title');
+            const desc = document.getElementById('result-desc');
+            const crack = document.getElementById('crack-overlay');
+            const actions = document.getElementById('result-actions');
+            
+            // 2. Самолет летит (задержка 1 сек)
+            setTimeout(() => {
+                plane.classList.add('fly');
+            }, 1000);
+
+            // 3. Взрыв (задержка 2 сек)
+            setTimeout(() => {
+                explosion.classList.add('boom');
+                container.classList.add('shake-screen'); // Трясем контейнер
+                plane.style.display = 'none';
+            }, 2000);
+
+            // 4. Трещины и смена 100% на 0% (задержка 2.5 сек)
+            setTimeout(() => {
+                container.classList.remove('shake-screen');
+                crack.classList.add('show');
+                
+                // Меняем круг
+                scoreCircle.style.background = `conic-gradient(var(--error) 0%, rgba(255,255,255,0.05) 0%)`;
+                scoreCircle.style.boxShadow = `0 0 30px rgba(248,113,113,0.4)`;
+                scoreValue.textContent = '0%';
+                scoreValue.style.color = 'var(--error)';
+                scoreValue.style.textShadow = `0 0 20px rgba(248,113,113,0.5)`;
+                
+                // Меняем текст
+                title.textContent = "Полный провал 💀";
+                title.style.color = "var(--error)";
+                desc.innerHTML = `Правильно: 0 из ${total}.<br><br>БПЛА уничтожил твою пятерку. Повтори материал!`;
+            }, 2500);
+
+            // 5. Плавный выезд кнопок (задержка 3.5 сек)
+            setTimeout(() => {
+                actions.classList.add('visible');
+            }, 3500);
+        }
+
+        // --- КОНФЕТТИ ---
+        function createConfetti() {
+            const colors = ['#818cf8', '#34d399', '#f472b6', '#fbbf24', '#60a5fa'];
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.style.position = 'fixed';
+                confetti.style.width = Math.random() * 10 + 5 + 'px';
+                confetti.style.height = Math.random() * 10 + 5 + 'px';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.top = '-20px';
+                confetti.style.zIndex = '9999';
+                confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+                confetti.style.pointerEvents = 'none';
+                const duration = Math.random() * 2 + 2;
+                const delay = Math.random() * 0.5;
+                confetti.style.animation = `fall ${duration}s ease-in forwards`;
+                confetti.style.animationDelay = `${delay}s`;
+                confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+                document.body.appendChild(confetti);
+                setTimeout(() => confetti.remove(), (duration + delay) * 1000);
+            }
+        }
+
+        const style = document.createElement('style');
+        style.innerHTML = `@keyframes fall { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(105vh) rotate(720deg); opacity: 0; } }`;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
