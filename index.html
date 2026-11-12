@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>Карта: субъекты РФ</title>
+<title>Регионы России</title>
 <style>
 :root{--sea:#cfe0e6;--oth:#dfe5e1;--nb:#8d9892;--tar:#a7d8c2;--ok:#2e9e5b;--bad:#d9453a;--hl:#fff;--halo:rgba(255,255,255,.85);
---glass:rgba(255,255,255,.82);--ink:#14231c;--mute:#5a6d64;--line:rgba(20,35,28,.14);--acc:#1f6f55;--warn:#d98a1a;
---ease:cubic-bezier(.22,.9,.28,1.05);--sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px)}
+--glass:rgba(255,255,255,.88);--ink:#14231c;--mute:#5a6d64;--line:rgba(20,35,28,.14);--acc:#1f6f55;--warn:#d98a1a;
+--ease:cubic-bezier(.22,.9,.28,1.05);--soft:cubic-bezier(.4,0,.2,1);--sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px)}
 @media (prefers-color-scheme:dark){:root{--sea:#0f1b22;--oth:#2b3a33;--nb:#0a0f0d;--tar:#2f6f58;--hl:#e8fff4;--halo:rgba(15,27,34,.88);
---glass:rgba(24,36,31,.82);--ink:#e8f2ed;--mute:#9bb0a6;--line:rgba(232,242,237,.14);--acc:#5fc4a0}}
+--glass:rgba(24,36,31,.88);--ink:#e8f2ed;--mute:#9bb0a6;--line:rgba(232,242,237,.14);--acc:#5fc4a0}}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;overflow:hidden;overscroll-behavior:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;background:var(--sea);color:var(--ink);
 font:17px/1.35 "Iowan Old Style","Palatino Linotype",Georgia,serif;-webkit-tap-highlight-color:transparent}
@@ -17,17 +17,20 @@ button{font:inherit;color:inherit;cursor:pointer}
 button:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
 
 #svg{position:fixed;inset:0;width:100%;height:100dvh;touch-action:none;user-select:none;background:var(--sea)}
-path{stroke:var(--sea);stroke-width:.7;vector-effect:non-scaling-stroke;transition:fill .45s ease,fill-opacity .45s ease;cursor:pointer}
+#svg.fly{shape-rendering:optimizeSpeed}
+path{stroke:var(--sea);stroke-width:.7;vector-effect:non-scaling-stroke;transition:fill .6s var(--soft),fill-opacity .6s ease;cursor:pointer}
 path.n{fill:var(--nb);pointer-events:none}
 path.o{fill:var(--oth)}
 path.t{fill:var(--tar)}
 body.hard path.t:not(.ok):not(.bad){fill:var(--oth)}
+path.ask{fill:var(--warn);stroke:var(--hl);stroke-width:1.8}
 path.ok,path.bad{stroke:var(--hl);stroke-width:1.8}
-path.ok{fill:var(--ok);animation:flash .8s ease 2}
+path.ok{fill:var(--ok);animation:flash .9s ease 2}
 path.bad{fill:var(--bad)}
 @keyframes flash{50%{fill-opacity:.45}}
 
-#lbls{stroke-linejoin:round;pointer-events:none}
+#lbls{stroke-linejoin:round;pointer-events:none;transition:opacity .35s ease}
+#svg.fly #lbls{opacity:0}
 #lbls text{text-anchor:middle;dominant-baseline:central;font-weight:600;fill:var(--ink);stroke:var(--halo);paint-order:stroke;opacity:0;transition:opacity .35s ease}
 #lbls text.on{opacity:1}
 #tools button[aria-pressed="false"]{opacity:.5}
@@ -35,19 +38,23 @@ path.bad{fill:var(--bad)}
 .toast,#tools,#label{touch-action:none}
 .ov{touch-action:pan-y}
 .prog{height:4px;border-radius:9px;background:var(--line);margin-top:8px;overflow:hidden}
-.prog i{display:block;height:100%;width:0;background:var(--acc);transition:width .7s var(--ease)}
+.prog i{display:block;height:100%;width:0;background:var(--acc);transition:width .8s var(--soft)}
 
 .toast{position:fixed;left:50%;width:min(92vw,470px);background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
 border:1px solid var(--line);border-radius:20px;padding:12px 16px;box-shadow:0 10px 34px rgba(0,0,0,.18);
-opacity:0;pointer-events:none;transition:transform .65s var(--ease),opacity .4s ease;z-index:5}
+opacity:0;pointer-events:none;transition:transform .7s var(--ease),opacity .45s ease;z-index:5;will-change:transform}
 .toast.in{opacity:1;pointer-events:auto}
 #top{top:calc(var(--sat) + 12px);transform:translate(-50%,-160%);display:flex;align-items:center;gap:14px}
 #top.in{transform:translate(-50%,0)}
-#bot{bottom:calc(var(--sab) + 14px);transform:translate(-50%,170%)}
-#bot.in{transform:translate(-50%,0)}
+#bot,#quiz{bottom:calc(var(--sab) + 14px);transform:translate(-50%,170%)}
+#bot.in,#quiz.in{transform:translate(-50%,0)}
+#quiz{padding:10px}
 .small{font-size:.85rem;color:var(--mute)}
 .big{font-size:1.3rem;font-weight:bold;line-height:1.2}
 #topTxt{flex:1;min-width:0}
+.swap{animation:swap .5s var(--ease)}
+@keyframes swap{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.skip{margin-top:8px;border:1px solid var(--line);background:transparent;border-radius:99px;padding:3px 12px;font-size:.8rem;color:var(--mute)}
 .ring{position:relative;width:52px;height:52px;flex:none}
 .ring svg{width:100%;height:100%;transform:rotate(-90deg)}
 .ring circle{fill:none;stroke-width:5}
@@ -61,17 +68,29 @@ opacity:0;pointer-events:none;transition:transform .65s var(--ease),opacity .4s 
 .res{display:flex;align-items:center;gap:12px}
 .ico{flex:none;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:1.3rem;font-weight:bold;background:var(--ok)}
 .ico.bad{background:var(--bad)}
-.ico.in{animation:pop .5s var(--ease)}
+.ico.in{animation:pop .55s var(--ease)}
 @keyframes pop{from{transform:scale(.3)}to{transform:scale(1)}}
 .btn{display:block;width:100%;margin-top:12px;padding:13px;border:0;border-radius:14px;background:var(--acc);color:#fff;font-weight:bold;transition:transform .15s,opacity .3s}
 .btn:active{transform:scale(.97)}
 .btn:disabled{opacity:.5}
-.chips{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px}
+.btn.alt{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 4px}
 .chip{border:1px solid var(--line);background:transparent;padding:8px 14px;border-radius:99px;transition:background .25s,color .25s,transform .15s}
 .chip:active{transform:scale(.95)}
 .chip[aria-pressed="true"]{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:bold}
-.btn.alt{background:transparent;color:var(--ink);border:1px solid var(--line)}
 .hide{display:none!important}
+
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.opt{border:1px solid var(--line);background:transparent;border-radius:14px;padding:10px 6px;min-height:56px;font-weight:600;font-size:.95rem;line-height:1.15;transition:background .3s,color .3s,transform .15s,opacity .3s}
+.opt:active{transform:scale(.96)}
+.opt.ok{background:var(--ok);border-color:var(--ok);color:#fff}
+.opt.bad{background:var(--bad);border-color:var(--bad);color:#fff}
+.opt.dim{opacity:.45}
+.qres{margin:10px 4px 0;display:flex;align-items:center;gap:10px}
+.qres:empty{display:none}
+.qres .ico{width:34px;height:34px;font-size:1.05rem}
+.qres b{display:block;line-height:1.15}
+#qnext{margin-top:10px;padding:11px}
 
 #label{position:fixed;left:0;top:0;z-index:4;pointer-events:none;opacity:0;transition:opacity .5s ease;
 background:var(--glass);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--line);
@@ -89,11 +108,16 @@ border-radius:12px;padding:7px 12px;text-align:center;max-width:70vw;box-shadow:
 opacity:0;pointer-events:none;transition:opacity .5s ease}
 .ov.show{opacity:1;pointer-events:auto}
 #quit{z-index:9}
-.card{width:min(100%,440px);max-height:88dvh;overflow:auto;background:var(--glass);border:1px solid var(--line);border-radius:24px;padding:22px 20px;
+.card{width:min(100%,440px);max-height:90dvh;overflow:auto;background:var(--glass);border:1px solid var(--line);border-radius:24px;padding:22px 20px;
 transform:translateY(24px) scale(.96);transition:transform .6s var(--ease)}
 .ov.show .card{transform:none}
-.card h1{font-size:1.6rem;margin:0 0 6px}
-.card p{margin:0 0 14px;color:var(--mute)}
+.card h1{font-size:1.7rem;margin:0 0 4px}
+.card p{margin:0 0 10px;color:var(--mute)}
+.lab{font-size:.75rem;letter-spacing:.07em;text-transform:uppercase;color:var(--mute);margin:14px 0 6px}
+.mode{display:block;width:100%;text-align:left;border:1px solid var(--line);background:transparent;border-radius:14px;padding:10px 14px;margin-bottom:8px;font-weight:bold;transition:background .25s,transform .15s}
+.mode:active{transform:scale(.98)}
+.mode small{display:block;font-size:.8rem;font-weight:normal;opacity:.8;margin-top:2px}
+.mode[aria-pressed="true"]{background:var(--acc);border-color:var(--acc);color:#fff}
 .score{font-size:3rem;font-weight:bold;line-height:1.1}
 .card ul{padding-left:20px;margin:0 0 6px}
 .card li{margin-bottom:5px}
@@ -107,13 +131,19 @@ transform:translateY(24px) scale(.96);transition:transform .6s var(--ease)}
 <div id="label"></div>
 
 <div class="toast" id="top">
-  <div id="topTxt"><div class="small" id="topSmall"></div><div class="big" id="topName"></div><div class="prog" id="prog"><i id="progI"></i></div></div>
+  <div id="topTxt"><div class="small" id="topSmall"></div><div class="big" id="topName"></div><div class="prog" id="prog"><i id="progI"></i></div><button class="skip" id="skip">Не знаю</button></div>
   <div class="ring" id="ring"><svg viewBox="0 0 48 48"><circle class="bg" cx="24" cy="24" r="20"/><circle class="fg" id="fg" cx="24" cy="24" r="20"/></svg><b id="sec"></b></div>
 </div>
 
 <div class="toast" id="bot">
   <div class="res"><div class="ico" id="ico">✓</div><div><div class="big" id="resHead"></div><div class="small" id="resSub"></div></div></div>
   <button class="btn" id="next">Далее</button>
+</div>
+
+<div class="toast" id="quiz">
+  <div class="opts" id="opts"></div>
+  <div class="qres" id="qres"></div>
+  <button class="btn hide" id="qnext">Далее</button>
 </div>
 
 <div id="tools">
@@ -127,25 +157,31 @@ transform:translateY(24px) scale(.96);transition:transform .6s var(--ease)}
 
 <div class="ov show" id="menu">
   <div class="card">
-    <h1>Карта субъектов РФ</h1>
-    <p>Появляется название — находишь регион на карте. На ответ 15–20 секунд. Карту можно двигать и приближать щипком.</p>
-    <div class="chips" id="chips"></div>
-    <button class="btn" id="bTest" style="margin-top:0">Начать тест</button>
-    <button class="btn alt" id="bStudy">Просто изучать карту</button>
+    <h1>Регионы России</h1>
+    <p>Тренажёр по субъектам РФ: карта и столицы.</p>
+    <div class="lab">Режим</div>
+    <div id="modes"></div>
+    <button class="btn" id="bTest" style="margin-top:18px">Далее</button>
+    <button class="btn alt hide" id="bWeak">Слабые места</button>
+    <button class="btn alt" id="bStudy">Изучать карту</button>
     <p class="small" style="margin:12px 0 0">Границы: <a href="https://www.amcharts.com/svg-maps/">amCharts</a></p>
   </div>
 </div>
 
-<div class="ov" id="end">
+<div class="ov" id="setup">
   <div class="card">
-    <h1>Готово</h1>
-    <div class="score" id="final"></div>
-    <div id="wrongBox" class="hide"><p style="margin:10px 0 6px">Повтори эти регионы:</p><ul id="wrong"></ul></div>
-    <p class="small hide" id="best" style="margin:12px 0 0"></p>
-    <button class="btn hide" id="bRetry">Повторить ошибки</button>
-    <button class="btn alt" id="again">В меню</button>
+    <h1 id="setTitle"></h1>
+    <p id="setDesc"></p>
+    <div class="lab">Что учим</div>
+    <div class="chips" id="chips"></div>
+    <div id="hardBox"><div class="lab">Сложность</div><div class="chips"><button class="chip" id="hardChip" aria-pressed="false">Сложный режим: всё серое</button></div></div>
+    <div class="lab">Сколько вопросов</div>
+    <div class="chips" id="lens"></div>
+    <button class="btn" id="bGo" style="margin-top:18px">Начать</button>
+    <button class="btn alt" id="bBack">Назад</button>
   </div>
 </div>
+
 
 <div class="ov" id="quit">
   <div class="card">
@@ -155,6 +191,22 @@ transform:translateY(24px) scale(.96);transition:transform .6s var(--ease)}
     <button class="btn alt" id="qYes">Завершить</button>
   </div>
 </div>
+
+<div class="ov" id="end">
+  <div class="card">
+    <h1>Результат</h1>
+    <div class="score" id="final"></div>
+    <p id="stats"></p>
+    <p class="small hide" id="best"></p>
+    <div id="wrongBox" class="hide">
+      <div class="lab">Ошибки</div>
+      <ul id="wrong"></ul>
+    </div>
+    <button class="btn hide" id="bRetry">Повторить ошибки</button>
+    <button class="btn alt" id="again">В меню</button>
+  </div>
+</div>
+
 
 <script>
 let LIMIT = 30;
@@ -191,29 +243,68 @@ CHE:"Челябинская область",BRY:"Брянская область
 const short = id => nameOf(id).replace(/^Республика /,"").replace(/ Республика$/,"").replace(" — Югра","").replace(" — Алания","")
   .replace(" автономный округ"," АО").replace("Еврейская автономная область","Еврейская АО").replace(" край"," кр.").replace(" область"," обл.")
   .replace("Донецкая Народная","ДНР").replace("Луганская Народная","ЛНР");
-let lblOn = true, lblScale = 0; const lblEls = [];
+
+// ---------- подписи на карте ----------
+let lblOn = true, lblScale = 0, base = 0, flying = false; const lblEls = [];
 function updLabels(force){
+  if (flying && !force) return;
   const sc = svg.getScreenCTM(); if (!sc) return;
   const s = sc.a;
   if (!force && lblScale && Math.abs(s/lblScale - 1) < 0.02) return;
-  lblScale = s;
+  lblScale = s; if (!base) base = s;
   const grp = $("lbls"); if (!grp) return;
-  grp.style.fontSize = (12.5/s) + "px"; grp.style.strokeWidth = (3.2/s) + "px";
-  for (const L of lblEls) L.el.classList.toggle("on", lblOn && L.id !== labelId && L.c[4]*s >= L.w && L.c[5]*s >= 15);
+  grp.style.fontSize = (11/s) + "px"; grp.style.strokeWidth = (3/s) + "px";
+  const all = s >= base*5;
+  for (const L of lblEls) L.el.classList.toggle("on", lblOn && L.id !== labelId && (all || (L.c[4]*s >= L.w*0.6 && L.c[5]*s >= 9)));
 }
 const setLbl = on => { lblOn = on; $("bLbl").setAttribute("aria-pressed", on); updLabels(true); };
+
+// ---------- данные и настройки ----------
 const KEYS = Object.keys(S);
 const GROUPS = {"Края": KEYS.slice(0,9), "Республики": KEYS.slice(9,33), "Округа и область": KEYS.slice(33)};
-let sel = new Set(["all"]), hard = false;
+const grpIdx = id => { const i = KEYS.indexOf(id); return i < 9 ? 0 : i < 33 ? 1 : 2; };
+const cw = id => grpIdx(id) === 1 ? "столица" : "центр";
+const cwU = id => cw(id)[0].toUpperCase() + cw(id).slice(1);
+const nameOf = id => S[id] ? S[id][0] : (N2[id.slice(3)] || "Другой регион");
+const MODES = [
+  ["map","🗺️ Найди на карте","Называется регион — нажми на него"],
+  ["cap","🏛️ Регион → столица","Регион подсвечен, выбери центр из 4"],
+  ["rev","📍 Столица → регион","Называется центр, выбери регион из 4"]
+];
+let sel = new Set(["all"]), hard = false, pick = "map", len = 20;
+const CK = "karta_cfg", WK = "karta_weak";
+function save(){ try { localStorage.setItem(CK, JSON.stringify({pick, sel:[...sel], hard, len})); } catch(e){} }
+function load(){
+  try {
+    const c = JSON.parse(localStorage.getItem(CK) || "{}");
+    if (["map","cap","rev"].includes(c.pick)) pick = c.pick;
+    if (Array.isArray(c.sel)){ const s = c.sel.filter(k => k === "all" || GROUPS[k]); if (s.length) sel = new Set(s); }
+    hard = !!c.hard;
+    if ([0,10,20].includes(c.len)) len = c.len;
+  } catch(e){}
+}
+const getWeak = () => { try { return JSON.parse(localStorage.getItem(WK) || "[]").filter(k => S[k]); } catch(e){ return []; } };
+const setWeak = a => { try { localStorage.setItem(WK, JSON.stringify(a)); } catch(e){} };
 const pool = () => sel.has("all") ? KEYS : KEYS.filter(id => [...sel].some(k => GROUPS[k].includes(id)));
-function drawChips(){
+
+function drawMenu(){
+  $("modes").innerHTML = MODES.map(([k,t,d]) => `<button class="mode" data-m="${k}" aria-pressed="${pick===k}">${t}<small>${d}</small></button>`).join("");
+  const mm = MODES.find(x => x[0] === pick);
+  $("setTitle").textContent = mm[1]; $("setDesc").textContent = mm[2];
   $("chips").innerHTML = ["Всё сразу", ...Object.keys(GROUPS)].map((t, i) => {
     const k = i ? t : "all";
     return `<button class="chip" data-k="${k}" aria-pressed="${sel.has(k)}">${t}</button>`;
-  }).join("") + `<button class="chip" data-k="hard" aria-pressed="${hard}">Сложный режим: всё серое</button>`;
-  $("bTest").textContent = `Начать тест (${pool().length})`;
+  }).join("");
+  $("lens").innerHTML = [[10,"10"],[20,"20"],[0,"Все"]].map(([v,t]) => `<button class="chip" data-l="${v}" aria-pressed="${len===v}">${t}</button>`).join("");
+  $("hardBox").classList.toggle("hide", pick !== "map");
+  $("hardChip").setAttribute("aria-pressed", hard);
+  const n = pool().length, cnt = len ? Math.min(len, n) : n;
+  $("bGo").textContent = `Начать (${cnt})`;
+  const w = getWeak().length;
+  $("bWeak").classList.toggle("hide", !w);
+  $("bWeak").textContent = `Тренировать слабые места (${w})`;
 }
-const nameOf = id => S[id] ? S[id][0] : (N2[id.slice(3)] || "Другой регион");
+
 
 const $ = id => document.getElementById(id);
 const NS = "http://www.w3.org/2000/svg";
@@ -253,27 +344,52 @@ function setVB(){ svg.setAttribute("viewBox", vb.join(" ")); placeLabel(); updLa
 addEventListener("resize", () => { measure(); const cx = vb[0]+vb[2]/2, cy = vb[1]+vb[3]/2, w = vb[2]; vb = [cx-w/2, cy-w/asp/2, w, w/asp]; setVB(); });
 
 // ---------- камера ----------
-const ease = k => k < .5 ? 4*k*k*k : 1 - Math.pow(-2*k+2, 3)/2;
-function flyTo(t, ms = 1100){
+// плавное движение: синус по времени, а центр двигается так, чтобы цель шла по экрану с постоянной скоростью
+const ease = k => -(Math.cos(Math.PI*k) - 1) / 2;
+function stopFly(){
   cancelAnimationFrame(raf);
-  const a = vb.slice(); t0 = performance.now();
+  if (flying){ flying = false; svg.classList.remove("fly"); updLabels(true); }
+}
+function flyTo(t, ms = 1300){
+  cancelAnimationFrame(raf);
+  const a = vb.slice(), st = performance.now();
   const acx = a[0]+a[2]/2, acy = a[1]+a[3]/2, bcx = t[0]+t[2]/2, bcy = t[1]+t[3]/2;
+  const wa = a[2], wb = t[2];
+  flying = true; svg.classList.add("fly");
   const step = now => {
-    const k = ms ? Math.min(1, (now-t0)/ms) : 1, e = ease(k);
-    const w = a[2]*Math.pow(t[2]/a[2], e), cx = acx+(bcx-acx)*e, cy = acy+(bcy-acy)*e;
+    const k = ms ? Math.min(1, (now-st)/ms) : 1, e = ease(k);
+    const w = wa*Math.pow(wb/wa, e);
+    const s = Math.abs(wb-wa) > wa*1e-6 ? (1/w - 1/wa)/(1/wb - 1/wa) : e;
+    const cx = acx+(bcx-acx)*s, cy = acy+(bcy-acy)*s;
     vb = [cx-w/2, cy-w/asp/2, w, w/asp]; setVB();
     if (k < 1) raf = requestAnimationFrame(step);
+    else { flying = false; svg.classList.remove("fly"); updLabels(true); }
   };
   raf = requestAnimationFrame(step);
 }
-let t0 = 0;
 const flyHome = ms => flyTo(fit(homeBox()), ms);
-function focusRegion(id){
+
+// сколько места на экране занято панелями сверху и снизу
+function insets(){
+  const H = innerHeight;
+  const top = $("top").offsetTop + $("top").offsetHeight + 10;
+  const panel = (mode === "cap" || mode === "rev") ? $("quiz") : $("bot");
+  const bot = H - panel.offsetTop + 10;
+  return {top, bot};
+}
+// регион по центру свободной зоны между панелями
+function focusRegion(id, ms){
   const c = DATA.c[id]; if (!c) return;
-  let w = Math.max(c[4]*2.8, DATA.home[2]/70);
-  w = Math.max(w, c[5]*2.8*asp);
-  const h = w/asp, cx = c[2]+c[4]/2, cy = c[3]+c[5]/2 + h*0.1;
-  flyTo([cx-w/2, cy-h/2, w, h], 1200);
+  const W = innerWidth, H = innerHeight, {top, bot} = insets();
+  const Bh = Math.max(140, H - top - bot), Bw = W - 70;
+  const hNeed = c[5]*H/(0.5*Bh);
+  let w = Math.max(c[4]*W/(0.6*Bw), hNeed*asp, DATA.home[2]/90);
+  w = Math.min(w, DATA.home[2]*1.3);
+  const h = w/asp;
+  const bc = top + Bh/2;
+  const cx = c[2] + c[4]/2 + (27/W)*w;
+  const cy = c[3] + c[5]/2 + (H/2 - bc)*h/H;
+  flyTo([cx-w/2, cy-h/2, w, h], ms || 1300);
 }
 function clamp(){
   const h = DATA.home, m = h[2]*.15, cx = vb[0]+vb[2]/2, cy = vb[1]+vb[3]/2;
@@ -282,7 +398,7 @@ function clamp(){
 }
 function pt(px, py){ const p = svg.createSVGPoint(); p.x = px; p.y = py; return p.matrixTransform(svg.getScreenCTM().inverse()); }
 function zoom(f, cx, cy){
-  cancelAnimationFrame(raf);
+  stopFly();
   let [x,y,w,h] = vb;
   if (w/f > DATA.home[2]*1.3) f = w/(DATA.home[2]*1.3);
   if (w/f < DATA.home[2]/250) return;
@@ -291,7 +407,7 @@ function zoom(f, cx, cy){
 const centerZoom = f => { const c = pt(innerWidth/2, innerHeight/2); zoom(f, c.x, c.y); };
 $("zi").onclick = () => centerZoom(1.7);
 $("zo").onclick = () => centerZoom(1/1.7);
-$("zh").onclick = () => flyHome(900);
+$("zh").onclick = () => flyHome(1000);
 $("bFull").onclick = () => { const d = document.documentElement; document.fullscreenElement ? document.exitFullscreen() : (d.requestFullscreen && d.requestFullscreen().catch(()=>{})); };
 svg.addEventListener("wheel", e => { e.preventDefault(); const c = pt(e.clientX, e.clientY); zoom(e.deltaY < 0 ? 1.25 : 0.8, c.x, c.y); }, {passive:false});
 
@@ -304,7 +420,7 @@ addEventListener("pointermove", e => {
   moved += Math.hypot(nw[0]-o[0], nw[1]-o[1]);
   if (moved > 8) dragged = true;
   if (!other){
-    if (dragged){ cancelAnimationFrame(raf); const a = svg.getScreenCTM().a; vb[0] -= (nw[0]-o[0])/a; vb[1] -= (nw[1]-o[1])/a; clamp(); setVB(); }
+    if (dragged){ stopFly(); const a = svg.getScreenCTM().a; vb[0] -= (nw[0]-o[0])/a; vb[1] -= (nw[1]-o[1])/a; clamp(); setVB(); }
   } else {
     const q = other[1], d0 = Math.hypot(o[0]-q[0], o[1]-q[1]), d1 = Math.hypot(nw[0]-q[0], nw[1]-q[1]);
     if (d0 > 0){ const c = pt((nw[0]+q[0])/2, (nw[1]+q[1])/2); zoom(d1/d0, c.x, c.y); }
@@ -315,7 +431,7 @@ addEventListener("pointermove", e => {
 svg.addEventListener("click", e => {
   if (dragged) return;
   const p = e.target.closest("path");
-  onPick(p && p.dataset.id ? p.dataset.id : "out");
+  if (p && p.dataset.id) onPick(p.dataset.id);
 });
 $("bLbl").onclick = () => setLbl(!lblOn);
 
@@ -324,12 +440,12 @@ $("bLbl").onclick = () => setLbl(!lblOn);
 document.addEventListener("touchmove", e => { if (!e.target.closest(".card")) e.preventDefault(); }, {passive:false});
 document.addEventListener("wheel", e => { if (e.ctrlKey) e.preventDefault(); }, {passive:false});
 
-// ---------- подпись региона ----------
+// ---------- подпись региона (только на карте и в изучении) ----------
 let labelId = null;
 function showLabel(id){
   labelId = id;
   const L = $("label");
-  L.innerHTML = `<b>${nameOf(id)}</b>` + (S[id] ? `<span>Центр: ${S[id][1]}</span>` : "");
+  L.innerHTML = `<b>${nameOf(id)}</b>` + (S[id] ? `<span>${cwU(id)}: ${S[id][1]}</span>` : "");
   placeLabel(); L.classList.add("show"); updLabels(true);
 }
 function hideLabel(){ $("label").classList.remove("show"); labelId = null; updLabels(true); }
@@ -341,13 +457,14 @@ function placeLabel(){
 }
 
 // ---------- игра ----------
-let order = [], idx = 0, score = 0, miss = [], phase = "", mode = "", tStart = 0, timer = null, nextT = 0;
-let paused = false, pausedAt = 0;
+let order = [], idx = 0, score = 0, miss = [], phase = "", mode = "", tStart = 0, timer = null, nextT = 0, autoT = 0;
+let paused = false, pausedAt = 0, times = [], streak = 0, bestStreak = 0;
 const shuffle = a => { a = a.slice(); for (let i=a.length-1;i>0;i--){ const j = Math.random()*(i+1)|0; [a[i],a[j]] = [a[j],a[i]]; } return a; };
-const clearMarks = () => Object.values(paths).forEach(p => p.classList.remove("ok","bad"));
+const clearMarks = () => Object.values(paths).forEach(p => p.classList.remove("ok","bad","ask"));
 const raise = id => { if (paths[id]) g.appendChild(paths[id]); };
 const ov = (id, on) => $(id).classList.toggle("show", on);
 const tin = (id, on) => $(id).classList.toggle("in", on);
+const swap = () => { const t = $("topTxt"); t.classList.remove("swap"); void t.offsetWidth; t.classList.add("swap"); };
 
 function pauseT(){
   if (phase === "ask" && !paused){ paused = true; clearInterval(timer); pausedAt = performance.now(); }
@@ -355,36 +472,51 @@ function pauseT(){
 function resumeT(){
   if (paused){ paused = false; tStart += performance.now() - pausedAt; clearInterval(timer); timer = setInterval(tick, 100); }
 }
-
 function resetUI(){
-  clearInterval(timer); clearTimeout(nextT); phase = ""; paused = false;
-  tin("top", false); tin("bot", false); hideLabel(); clearMarks();
+  clearInterval(timer); clearTimeout(nextT); clearTimeout(autoT); phase = ""; paused = false;
+  tin("top", false); tin("bot", false); tin("quiz", false); hideLabel(); clearMarks();
 }
 function startTest(list){
-  resetUI(); mode = "test"; order = shuffle(list || pool()); idx = 0; score = 0; miss = [];
-  document.body.classList.toggle("hard", hard);
-  setLbl(false);
-  ov("menu", false); $("ring").classList.remove("hide"); $("prog").classList.remove("hide"); $("progI").style.width = "0%"; flyHome(900);
-  setTimeout(ask, 500);
+  resetUI(); mode = pick;
+  let ids = shuffle(list || pool());
+  if (!list && len) ids = ids.slice(0, len);
+  order = ids; idx = 0; score = 0; miss = []; times = []; streak = 0; bestStreak = 0;
+  document.body.classList.toggle("hard", hard && mode === "map");
+  setLbl(mode === "map" ? !hard : false);
+  ov("menu", false); $("ring").classList.remove("hide"); $("prog").classList.remove("hide"); $("progI").style.width = "0%"; flyHome(1000);
+  setTimeout(ask, 600);
 }
 function startStudy(){
   resetUI(); mode = "study"; phase = "study";
   document.body.classList.remove("hard");
   setLbl(true);
-  ov("menu", false); flyHome(900);
+  ov("menu", false); flyHome(1000);
   $("topSmall").textContent = "Режим изучения"; $("topName").textContent = "Нажми на любой регион";
-  $("ring").classList.add("hide"); $("prog").classList.add("hide"); $("next").classList.add("hide");
+  $("ring").classList.add("hide"); $("prog").classList.add("hide"); $("next").classList.add("hide"); $("skip").classList.add("hide");
   setTimeout(() => tin("top", true), 400);
 }
+function showOpts(tid){
+  const others = shuffle(KEYS.filter(k => k !== tid));
+  const same = others.filter(k => grpIdx(k) === grpIdx(tid)), rest = others.filter(k => grpIdx(k) !== grpIdx(tid));
+  const opts = shuffle([tid, ...same.concat(rest).slice(0, 3)]);
+  $("opts").innerHTML = opts.map(k => `<button class="opt" data-id="${k}">${mode === "cap" ? S[k][1] : S[k][0]}</button>`).join("");
+  $("qres").innerHTML = ""; $("qnext").classList.add("hide"); $("qnext").disabled = false;
+}
 function ask(){
-  LIMIT = 15 + Math.floor(Math.random() * 6);
+  LIMIT = mode === "map" ? 15 + (Math.random()*6|0) : 10 + (Math.random()*6|0);
   clearMarks(); hideLabel(); tin("bot", false); phase = "ask"; paused = false;
-  $("next").classList.remove("hide");
-  $("topSmall").textContent = `Регион ${idx+1} из ${order.length} · верно: ${score}`;
-  $("topName").textContent = nameOf(order[idx]);
+  const tid = order[idx], quiz = mode !== "map", first = !$("top").classList.contains("in");
+  $("next").classList.remove("hide"); $("skip").classList.remove("hide");
+  $("topSmall").textContent = `Вопрос ${idx+1} из ${order.length} · верно: ${score}` + (mode === "cap" ? " · выбери столицу" : mode === "rev" ? " · выбери регион" : "");
+  $("topName").textContent = mode === "rev" ? S[tid][1] : nameOf(tid);
   $("progI").style.width = (idx/order.length*100) + "%";
-  tin("top", false);
-  setTimeout(() => { tin("top", true); tStart = performance.now(); clearInterval(timer); timer = setInterval(tick, 100); tick(); }, 250);
+  swap();
+  if (quiz) showOpts(tid);
+  if (mode === "cap"){ paths[tid].classList.add("ask"); raise(tid); focusRegion(tid, 1400); }
+  setTimeout(() => {
+    tin("top", true); if (quiz) tin("quiz", true);
+    tStart = performance.now(); clearInterval(timer); timer = setInterval(tick, 100); tick();
+  }, first ? 250 : 150);
 }
 function tick(){
   const left = Math.max(0, LIMIT - (performance.now()-tStart)/1000);
@@ -396,56 +528,85 @@ function tick(){
 }
 function onPick(id){
   if (mode === "study"){
-    if (id === "out") return;
     clearMarks(); paths[id].classList.add("bad"); raise(id);
     $("ico").className = "ico in"; $("ico").textContent = "i"; $("ico").style.background = "var(--acc)";
     $("resHead").textContent = nameOf(id);
-    $("resSub").textContent = S[id] ? `Центр: ${S[id][1]}` : "Не из списка (область или город)";
+    $("resSub").textContent = S[id] ? `${cwU(id)}: ${S[id][1]}` : "Не из списка (область или город)";
     tin("bot", true); focusRegion(id); showLabel(id);
     return;
   }
-  if (phase === "ask" && !paused) answer(id);
+  if (mode === "map" && phase === "ask" && !paused) answer(id);
 }
-function answer(id){
-  phase = "done"; clearInterval(timer);
-  const tid = order[idx], [name, cap] = S[tid], right = id === tid;
-  paths[tid].classList.add("ok"); raise(tid);
-  $("ico").style.background = "";
-  if (right){ score++; }
-  else {
-    miss.push(tid);
-    if (id && paths[id]){ paths[id].classList.add("bad"); raise(id); raise(tid); }
-  }
-  $("ico").className = "ico in" + (right ? "" : " bad");
-  $("ico").textContent = right ? "✓" : "✗";
-  $("resHead").textContent = right ? "Верно!" : (id === "out" ? "Неверно — ты нажал мимо регионов" : id ? `Неверно — это ${nameOf(id)}` : "Время вышло");
-  $("resSub").textContent = `${name} — центр: ${cap}`;
-  $("topSmall").textContent = `Регион ${idx+1} из ${order.length} · верно: ${score}`;
-  $("next").textContent = idx === order.length-1 ? "Показать результат" : "Далее";
-  $("next").disabled = false;
-  $("progI").style.width = ((idx+1)/order.length*100) + "%";
-  if (navigator.vibrate) navigator.vibrate(right ? 25 : [40,50,40]);
-  focusRegion(tid); showLabel(tid); tin("bot", true);
-}
-$("next").onclick = () => {
-  if (phase !== "done") return;
-  phase = "wait"; $("next").disabled = true;
-  tin("bot", false); hideLabel();
-  if (idx === order.length-1){ tin("top", false); setTimeout(finish, 700); return; }
-  flyHome(1000);
-  nextT = setTimeout(() => { idx++; ask(); }, 2000);
+$("opts").onclick = e => {
+  const b = e.target.closest(".opt");
+  if (!b || phase !== "ask" || paused) return;
+  answer(b.dataset.id);
 };
+$("skip").onclick = () => { if (phase === "ask" && !paused) answer(null, "skip"); };
+
+function answer(id, why){
+  phase = "done"; clearInterval(timer);
+  const tid = order[idx], [name, cap] = S[tid], right = id === tid, quiz = mode !== "map";
+  times.push(id ? Math.min(LIMIT, (performance.now()-tStart)/1000) : LIMIT);
+  if (right){ score++; streak++; bestStreak = Math.max(bestStreak, streak); } else { miss.push(tid); streak = 0; }
+  let w = getWeak(); if (right) w = w.filter(k => k !== tid); else if (!w.includes(tid)) w.push(tid); setWeak(w);
+  paths[tid].classList.remove("ask"); paths[tid].classList.add("ok"); raise(tid);
+  if (!right && id && mode === "map" && paths[id]){ paths[id].classList.add("bad"); raise(id); raise(tid); }
+  const head = right ? "Верно!" : id ? (mode === "map" ? `Неверно — это ${nameOf(id)}` : "Неверно") : (why === "skip" ? "Пропущено" : "Время вышло");
+  const sub = `${name} — ${cw(tid)}: ${cap}`;
+  const last = idx === order.length-1;
+  $("topSmall").textContent = `Вопрос ${idx+1} из ${order.length} · верно: ${score}`;
+  $("progI").style.width = ((idx+1)/order.length*100) + "%";
+  if (quiz){
+    document.querySelectorAll("#opts .opt").forEach(b => {
+      if (b.dataset.id === tid) b.classList.add("ok");
+      else if (b.dataset.id === id) b.classList.add("bad");
+      else b.classList.add("dim");
+    });
+    $("qres").innerHTML = `<div class="ico ${right ? "" : "bad"} in">${right ? "✓" : "✗"}</div><div><b>${head}</b><span class="small">${sub}</span></div>`;
+    $("qnext").textContent = last ? "Показать результат" : "Далее";
+    $("qnext").classList.remove("hide"); $("qnext").disabled = false;
+    tin("quiz", true);
+  } else {
+    $("ico").style.background = "";
+    $("ico").className = "ico in" + (right ? "" : " bad");
+    $("ico").textContent = right ? "✓" : "✗";
+    $("resHead").textContent = head; $("resSub").textContent = sub;
+    $("next").textContent = last ? "Показать результат" : "Далее";
+    $("next").disabled = false;
+    tin("bot", true);
+  }
+  if (navigator.vibrate) navigator.vibrate(right ? 25 : [40,50,40]);
+  focusRegion(tid, 1200);
+  if (!quiz) showLabel(tid);
+  // верный ответ в тестах со столицами листается сам
+  if (quiz && right && !last) autoT = setTimeout(advance, 1700);
+}
+function advance(){
+  if (phase !== "done") return;
+  clearTimeout(autoT);
+  phase = "wait"; $("next").disabled = true; $("qnext").disabled = true;
+  tin("bot", false); tin("quiz", false); hideLabel();
+  if (idx === order.length-1){ tin("top", false); setTimeout(finish, 700); return; }
+  if (mode !== "cap") flyHome(1100);
+  nextT = setTimeout(() => { idx++; ask(); }, mode === "map" ? 1700 : mode === "cap" ? 400 : 800);
+}
+$("next").onclick = advance;
+$("qnext").onclick = advance;
+
 function finish(){
-  flyHome(900); clearMarks();
+  flyHome(1000); clearMarks();
   const pct = Math.round(score / order.length * 100);
   $("final").innerHTML = `${score} из ${order.length} <span style="font-size:1.5rem;color:var(--acc)">· ${pct}%</span>`;
+  const avg = times.length ? (times.reduce((a,b) => a+b, 0) / times.length).toFixed(1) : "–";
+  $("stats").textContent = `Среднее время ответа: ${avg} с · лучшая серия: ${bestStreak}`;
   $("wrongBox").classList.toggle("hide", !miss.length);
   $("bRetry").classList.toggle("hide", !miss.length);
   $("best").classList.add("hide");
-  if (order.length === Object.keys(S).length){
+  if (order.length === KEYS.length){
     try {
-      const old = +localStorage.getItem("karta_best") || 0;
-      if (score > old) localStorage.setItem("karta_best", score);
+      const key = "karta_best_" + mode, old = +localStorage.getItem(key) || 0;
+      if (score > old) localStorage.setItem(key, score);
       $("best").textContent = score > old ? "Новый рекорд!" : `Рекорд: ${old} из ${order.length}`;
       $("best").classList.remove("hide");
     } catch (e) {}
@@ -456,12 +617,12 @@ function finish(){
 
 // выход из теста с подтверждением
 $("bMenu").onclick = () => {
-  if (mode !== "test" || !phase){ resetUI(); ov("menu", true); return; }
+  if (mode === "study" || !phase){ resetUI(); drawMenu(); ov("menu", true); return; }
   pauseT();
   ov("quit", true);
 };
 $("qNo").onclick = () => { ov("quit", false); resumeT(); };
-$("qYes").onclick = () => { ov("quit", false); document.body.classList.remove("hard"); resetUI(); ov("menu", true); };
+$("qYes").onclick = () => { ov("quit", false); document.body.classList.remove("hard"); resetUI(); drawMenu(); ov("menu", true); };
 
 // пауза, если вкладку свернули
 document.addEventListener("visibilitychange", () => {
@@ -469,21 +630,37 @@ document.addEventListener("visibilitychange", () => {
   else if (!$("quit").classList.contains("show")) resumeT();
 });
 
-$("again").onclick = () => { ov("end", false); document.body.classList.remove("hard"); ov("menu", true); };
-$("bTest").onclick = () => startTest();
+$("again").onclick = () => { ov("end", false); document.body.classList.remove("hard"); drawMenu(); ov("menu", true); };
+$("bTest").onclick = () => { drawMenu(); ov("menu", false); ov("setup", true); };
+$("bBack").onclick = () => { ov("setup", false); ov("menu", true); };
+$("bGo").onclick = () => { ov("setup", false); startTest(); };
+
+$("bWeak").onclick = () => startTest(getWeak());
 $("bRetry").onclick = () => { const m = miss.slice(); ov("end", false); startTest(m); };
 $("bStudy").onclick = startStudy;
 
-$("chips").onclick = e => {
-  const b = e.target.closest(".chip"); if (!b) return;
-  const k = b.dataset.k;
-  if (k === "hard"){ hard = !hard; drawChips(); return; }
-  if (k === "all") sel = new Set(["all"]);
-  else { sel.delete("all"); sel.has(k) ? sel.delete(k) : sel.add(k); if (!sel.size) sel = new Set(["all"]); }
-  drawChips();
-};
-drawChips();
+// меню и настройки
+document.addEventListener("click", e => {
+  if (!e.target.closest("#menu, #setup")) return;
+  const m = e.target.closest(".mode"), c = e.target.closest(".chip");
+  if (m) pick = m.dataset.m;
+  else if (c){
+    if (c.id === "hardChip") hard = !hard;
+    else if (c.dataset.l !== undefined) len = +c.dataset.l;
+    else if (c.dataset.k){
+      const k = c.dataset.k;
+      if (k === "all") sel = new Set(["all"]);
+      else { sel.delete("all"); sel.has(k) ? sel.delete(k) : sel.add(k); if (!sel.size) sel = new Set(["all"]); }
+    }
+  } else return;
+  save(); drawMenu();
+});
+
+
+load();
+drawMenu();
 build();
 </script>
 </body>
 </html>
+
